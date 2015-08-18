@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-`include "defines.v"
+`include "ao486-defines.v"
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
@@ -232,6 +232,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/memory_read.v"
+`include "autogen/autogen_memory_read.v"
 
 endmodule

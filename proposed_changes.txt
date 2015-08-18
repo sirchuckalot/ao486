@@ -1,0 +1,69 @@
+Cores needed:
+\rtl\wb_intercon
+\rtl\verilog_utils
+\rtl\wb_avalon_bridge
+\rtl\ram_wb
+\rtl\wb_common
+
+\rtl\wb_gpio
+\rtl\wb_serial
+
+\boards\nexys4-ddr\backend
+
+Add file:
+\rtl\verilog_utils\verilog_utils.vh
+
+Rename file:
+\rtl\ao486\defines.v to ao486-defines.v
+\rtl\ao486\autogen\defines.v to autogen-defines.v
+
+Change includes:
+\rtl\ao486\avalon_io.v to `include "ao486-defines.v"
+\rtl\ao486\exception.v to `include "ao486-defines.v"
+\rtl\ao486\global_regs.v to `include "ao486-defines.v"
+\rtl\ao486\memory\memory.v to `include "ao486-defines.v"
+\rtl\ao486\pipeline\pipeline.v to `include "ao486-defines.v"
+
+\rtl\ao486\memory\link_writeburst.v to `include "ao486-defines.v"
+\rtl\ao486\memory\link_writeline.v to `include "ao486-defines.v"
+\rtl\ao486\memory\avalon_mem.v to `include "ao486-defines.v"
+\rtl\ao486\memory\cache_data_ram.v
+\rtl\ao486\memory\dcache.v
+\rtl\ao486\memory\dcache_control_ram.v
+\rtl\ao486\memory\dcache_matched.v
+\rtl\ao486\memory\dcache_read.v
+\rtl\ao486\memory\dcache_to_icache_fifo.v
+\rtl\ao486\memory\dcache_write.v
+\rtl\ao486\memory\icache.v
+\rtl\ao486\memory\icache_control_ram.v
+\rtl\ao486\memory\icache_matched.v
+\rtl\ao486\memory\icache_read.v
+\rtl\ao486\memory\link_dcacheread.v
+\rtl\ao486\memory\link_readburst.v
+\rtl\ao486\memory\link_readcode.v
+\rtl\ao486\memory\link_readline.v
+\rtl\ao486\memory\memory_read.v
+\rtl\ao486\memory\memory_write.v
+\rtl\ao486\memory\prefetch_control.v
+\rtl\ao486\memory\prefetch_fifo.v
+\rtl\ao486\memory\prefetch.v
+\rtl\ao486\memory\tlb_memtype.v
+\rtl\ao486\memory\tlb_regs.v
+\rtl\ao486\memory\tlb.v
+
+Change includes `include "ao486-defines.v" in rtl\pipeline:
+All files in \rtl\pipeline except the following:
+\rtl\pipeline\condition.v
+\rtl\pipeline\decode_ready.v
+\rtl\pipeline\decode_regs.v
+
+Add defines:
+\rtl\ao486\pipeline\decode_commands.v `include "ao486-defines.v"
+\rtl\ao486\pipeline\decode_prefix.v `include "ao486-defines.v"
+
+Rename all files in:
+\rtl\autogen to have autogen at begining of file
+for example \rtl\autogen\autogen_avalon_io.v
+
+Change files that reference \rtl\autogen because of the previous rename step:
+  for example includes \autogen\autogen_avalon_io.v

@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-`include "defines.v"
+`include "ao486-defines.v"
 
 module fetch(
     input               clk,

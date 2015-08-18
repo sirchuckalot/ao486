@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-`include "defines.v"
+`include "ao486-defines.v"
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
@@ -319,6 +319,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/avalon_mem.v"
+`include "autogen/autogen_avalon_mem.v"
 
 endmodule

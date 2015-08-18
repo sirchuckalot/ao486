@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+`include "ao486-defines.v"
+
 module decode_prefix(
     input               clk,
     input               rst_n,

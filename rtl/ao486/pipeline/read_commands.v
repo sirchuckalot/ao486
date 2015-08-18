@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-`include "defines.v"
+`include "ao486-defines.v"
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
@@ -255,6 +255,6 @@ wire _unused_ok = &{ 1'b0, glob_param_2[31:6], glob_param_3[31:25], tr[1:0], tr_
 
 //------------------------------------------------------------------------------
 
-`include "autogen/read_commands.v"
+`include "autogen/autogen_read_commands.v"
 
 endmodule

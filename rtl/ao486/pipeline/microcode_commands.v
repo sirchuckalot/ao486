@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-`include "defines.v"
+`include "ao486-defines.v"
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
@@ -76,6 +76,6 @@ wire _unused_ok = &{ 1'b0, glob_param_1[31:18], glob_param_1[15:2], glob_param_3
 
 //------------------------------------------------------------------------------
 
-`include "autogen/microcode_commands.v"
+`include "autogen/autogen_microcode_commands.v"
 
 endmodule
