@@ -1,0 +1,78 @@
+#
+#  Makefile for building the Zet BIOS in Windows
+#  Copyright (C) 2010  Zeus Gomez Marmolejo <zeus@aluzina.org>
+#  Copyright (C) 2010  Donna Polehn <dpolehn@verizon.net>
+#
+#  This file is part of the Zet processor. This program is free software;
+#  you can redistribute it and/or modify it under the terms of the GNU
+#  General Public License as published by the Free Software Foundation;
+#  either version 3, or (at your option) any later version.
+#
+#  Zet is distrubuted in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+#  License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Zet; see the file COPYING. If not, see
+#  <http://www.gnu.org/licenses/>.
+#
+
+#
+#  ZET BIOS BUILD MAKE - Windows version - 05-24-2010
+#  ----------------------------------------------------------------------------
+#
+#  This is the make file for the Zet Rom BIOS and VGA BIOS Builds.
+#  To build it, you will need the Open Watcom compiler. If you have
+#  it installed on your machine, then you should be able to just type
+#  wmake and watcom should build it. There will be a small number of warning
+#  messages, this is normal.
+#
+
+# File extension in Windows
+O = .obj
+E = .exe
+
+# Current directory (for executing programs)
+CDIR = .\
+
+#all: mon88.rom upload.exe
+all: mon88.rom hexer.exe
+
+!include "common.inc"
+
+# Make Utilities -------------------------------------------------------------
+# This section compiles the following utilities:
+#  biossums.exe - Computes bios rom checksum value and appends it to the rom
+#  vgasums.exe  - Same thing but for the vga rom
+#  ff.exe       - Fills the space between vga and bios with 0xFF
+#  meow.exe     - Concatenates the vga, ff and bios roms together into 1 file
+#  hexer.exe    - Converts the finished bios rom to hex
+#  mifer.exe    - Makes the Shadow Boot rom
+#
+# The C option flags for this build are standard console build since
+# these utilities will run on your PC not on the ZET
+# ----------------------------------------------------------------------------
+C386OPTS = -w4 -e25 -zq -od -d2 -6r -bt=nt -fo=.obj -mf
+
+#makehex: mon88.rom .autodepend
+#  hexer mon88.rom
+  
+hexer$(E): hexer$(O) .autodepend
+    wlink name hexer d all sys nt op m op maxe=25 op q op symf FIL hexer.obj
+    hexer mon88.rom
+    copy mon88.rom ..\..\rtl
+    copy mon88.hex ..\..\rtl
+
+hexer$(O): ..\tools\hexer.c
+    wcc386 $(C386OPTS) ..\tools\hexer.c
+    
+upload$(E): upload$(O) .autodepend
+    wlink name upload d all sys nt op m op maxe=25 op q op symf FIL upload.obj
+
+upload$(O): .\Bootloader\upload.c
+    wcc386 $(C386OPTS) .\Bootloader\upload.c
+
+clean:
+	del  *.dat *.hex *.o *.obj *.sym *.rom *.exe *.err *.map
+	del ..\..\rtl\*.hex ..\..\rtl\*.rom
