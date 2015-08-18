@@ -1,2 +1,6 @@
 /ao486_tool/build/
 /ao486_tool/dist/
+/boards/nexys4-ddr/syn/vivado/nexys4_ddr_top.cache
+/boards/nexys4-ddr/syn/vivado/nexys4_ddr_top.hw
+/boards/nexys4-ddr/syn/vivado/nexys4_ddr_top.runs
+/boards/nexys4-ddr/syn/vivado/nexys4_ddr_top.sim
