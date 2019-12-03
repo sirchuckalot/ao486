@@ -319,6 +319,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/avalon_mem.v"
+`include "autogen/autogen_avalon_mem.v"
 
 endmodule

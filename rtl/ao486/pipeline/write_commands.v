@@ -583,7 +583,7 @@ wire _unused_ok = &{ 1'b0, glob_param_1[31:21], glob_param_5[31:22], glob_param_
 
 //------------------------------------------------------------------------------
 
-`include "autogen/write_commands.v"
+`include "autogen/autogen_write_commands.v"
 
 //------------------------------------------------------------------------------
 

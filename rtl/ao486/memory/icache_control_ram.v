@@ -149,6 +149,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/icache_control_ram.v"
+`include "autogen/autogen_icache_control_ram.v"
 
 endmodule

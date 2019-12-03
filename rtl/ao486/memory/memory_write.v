@@ -228,6 +228,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/memory_write.v"
+`include "autogen/autogen_memory_write.v"
 
 endmodule

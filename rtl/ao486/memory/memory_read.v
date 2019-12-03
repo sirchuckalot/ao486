@@ -232,6 +232,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/memory_read.v"
+`include "autogen/autogen_memory_read.v"
 
 endmodule

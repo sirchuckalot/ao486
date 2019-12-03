@@ -520,7 +520,7 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/exception.v"
+`include "autogen/autogen_exception.v"
 
 
 endmodule

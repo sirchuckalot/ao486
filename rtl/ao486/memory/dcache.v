@@ -721,6 +721,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/dcache.v"
+`include "autogen/autogen_dcache.v"
 
 endmodule

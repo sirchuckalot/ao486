@@ -489,6 +489,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/icache.v"
+`include "autogen/autogen_icache.v"
 
 endmodule

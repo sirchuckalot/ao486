@@ -1061,6 +1061,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/tlb.v"
+`include "autogen/autogen_tlb.v"
 
 endmodule

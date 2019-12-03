@@ -76,6 +76,6 @@ wire _unused_ok = &{ 1'b0, glob_param_1[31:18], glob_param_1[15:2], glob_param_3
 
 //------------------------------------------------------------------------------
 
-`include "autogen/microcode_commands.v"
+`include "autogen/autogen_microcode_commands.v"
 
 endmodule

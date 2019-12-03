@@ -112,7 +112,7 @@ wire _unused_ok = &{ 1'b0, decoder[95:16], decoder[10:8], 1'b0 };
 
 //------------------------------------------------------------------------------
 
-`include "autogen/decode_commands.v"
+`include "autogen/autogen_decode_commands.v"
 
 
 endmodule

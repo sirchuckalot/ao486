@@ -266,6 +266,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/dcache_control_ram.v"
+`include "autogen/autogen_dcache_control_ram.v"
 
 endmodule

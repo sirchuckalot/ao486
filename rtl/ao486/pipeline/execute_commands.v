@@ -415,7 +415,7 @@ wire _unused_ok = &{ 1'b0, edx[31:16], tr_cache[63:44], tr_cache[39:0], exe_mute
 
 //------------------------------------------------------------------------------
 
-`include "autogen/execute_commands.v"
+`include "autogen/autogen_execute_commands.v"
 
 //------------------------------------------------------------------------------
     

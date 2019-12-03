@@ -156,6 +156,6 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/prefetch_control.v"
+`include "autogen/autogen_prefetch_control.v"
 
 endmodule
