@@ -278,6 +278,8 @@ wire [2:0]  io_write_length;
 wire [31:0] io_write_data;
 wire        io_write_done;
 
+wire        dcache_busy;
+
 avalon_io avalon_io_inst(
     .clk                (clk),
     .rst_n              (rst_n),
@@ -399,7 +401,7 @@ wire        tlbcheck_page_fault;
 wire [31:0] tlbcheck_address;
 wire        tlbcheck_rw;
 
-wire        dcache_busy;
+//wire        dcache_busy;
 
 wire        tlbflushsingle_do;
 wire        tlbflushsingle_done;
