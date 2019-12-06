@@ -28,7 +28,7 @@
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
-module avalon_mem(
+module wb_mem(
     // global
     input               clk,
     input               rst_n,
@@ -80,17 +80,17 @@ module avalon_mem(
     output              readcode_partial_done,
     //END
     
-    // avalon master
-    output reg  [31:0]  avm_address,
-    output reg  [31:0]  avm_writedata,
-    output reg  [3:0]   avm_byteenable,
-    output reg  [2:0]   avm_burstcount,
-    output reg          avm_write,
-    output reg          avm_read,
+    // Wishbone master
+    output reg  [31:0]  wb_address_o,
+    output reg  [31:0]  wb_writedata_o,
+    output reg  [3:0]   wb_byteenable_o,
+    output reg  [2:0]   wb_burstcount_o,
+    output reg          wb_write_o,
+    output reg          wb_read_o,
     
-    input               avm_waitrequest,
-    input               avm_readdatavalid,
-    input       [31:0]  avm_readdata
+    input               wb_waitrequest_i,
+    input               wb_readdatavalid_i,
+    input       [31:0]  wb_readdata_i
 );
 
 //------------------------------------------------------------------------------
@@ -175,13 +175,13 @@ IF(state == STATE_IDLE);
     
     IF(writeburst_do);
 
-        SAVE(avm_address,        { writeburst_address[31:2], 2'd0 });
-        SAVE(avm_byteenable,     writeburst_byteenable_0);
+        SAVE(wb_address_o,        { writeburst_address[31:2], 2'd0 });
+        SAVE(wb_byteenable_o,     writeburst_byteenable_0);
         SAVE(byteenable_next,    writeburst_byteenable_1);
-        SAVE(avm_burstcount,     { 1'b0, writeburst_dword_length });
-        SAVE(avm_write,          `TRUE);
+        SAVE(wb_burstcount_o,     { 1'b0, writeburst_dword_length });
+        SAVE(wb_write_o,          `TRUE);
 
-        SAVE(avm_writedata,         writeburst_data[31:0]);
+        SAVE(wb_writedata_o,         writeburst_data[31:0]);
         SAVE(bus_0,         { 8'd0, writeburst_data[55:32] });
 
         SET(writeburst_done);
@@ -190,13 +190,13 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(writeline_do);
 
-        SAVE(avm_address,        { writeline_address[31:4], 4'd0 });
-        SAVE(avm_byteenable,     4'hF);
+        SAVE(wb_address_o,        { writeline_address[31:4], 4'd0 });
+        SAVE(wb_byteenable_o,     4'hF);
         SAVE(byteenable_next,    4'hF);
-        SAVE(avm_burstcount,     3'd4);
-        SAVE(avm_write,          `TRUE);
+        SAVE(wb_burstcount_o,     3'd4);
+        SAVE(wb_write_o,          `TRUE);
 
-        SAVE(avm_writedata, writeline_line[31:0]);
+        SAVE(wb_writedata_o, writeline_line[31:0]);
         SAVE(bus_0,         writeline_line[63:32]);
         SAVE(bus_1,         writeline_line[95:64]);
         SAVE(bus_2,         writeline_line[127:96]);
@@ -207,30 +207,30 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(readburst_do && ~(readburst_done));
 
-        SAVE(avm_address,    { readburst_address[31:2], 2'd0 });
-        SAVE(avm_byteenable, read_burst_byteenable);
-        SAVE(avm_burstcount, { 1'b0, readburst_dword_length });
-        SAVE(avm_read,      `TRUE);
+        SAVE(wb_address_o,    { readburst_address[31:2], 2'd0 });
+        SAVE(wb_byteenable_o, read_burst_byteenable);
+        SAVE(wb_burstcount_o, { 1'b0, readburst_dword_length });
+        SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    readburst_dword_length - 2'd1);
         SAVE(state,      STATE_READ);
 
     ELSE_IF(readline_do && ~(readline_done));
 
-        SAVE(avm_address,    { readline_address[31:4], 4'd0 });
-        SAVE(avm_byteenable, 4'hF);
-        SAVE(avm_burstcount, 3'd4);
-        SAVE(avm_read,      `TRUE);
+        SAVE(wb_address_o,    { readline_address[31:4], 4'd0 });
+        SAVE(wb_byteenable_o, 4'hF);
+        SAVE(wb_burstcount_o, 3'd4);
+        SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    2'd3);
         SAVE(state,      STATE_READ);
 
     ELSE_IF(readcode_do && ~(readcode_done));
 
-        SAVE(avm_address,    { readcode_address[31:2], 2'd0 });
-        SAVE(avm_byteenable, 4'hF);
-        SAVE(avm_burstcount, 3'd4);
-        SAVE(avm_read,      `TRUE);
+        SAVE(wb_address_o,    { readcode_address[31:2], 2'd0 });
+        SAVE(wb_byteenable_o, 4'hF);
+        SAVE(wb_burstcount_o, 3'd4);
+        SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    2'd3);
         SAVE(state,      STATE_READ_CODE);
@@ -242,17 +242,17 @@ ENDIF();
     
 IF(state == STATE_WRITE);    
 
-    IF(~(avm_waitrequest) && counter == 2'd0);
-        SAVE(avm_write,  `FALSE);
+    IF(~(wb_waitrequest_i) && counter == 2'd0);
+        SAVE(wb_write_o,  `FALSE);
         SAVE(state,      STATE_IDLE);
     ENDIF();
     
-    IF(~(avm_waitrequest) && counter != 2'd0);
-        SAVE(avm_writedata, bus_0);
+    IF(~(wb_waitrequest_i) && counter != 2'd0);
+        SAVE(wb_writedata_o, bus_0);
         SAVE(bus_0,         bus_1);
         SAVE(bus_1,         bus_2);
         
-        SAVE(avm_byteenable, byteenable_next);
+        SAVE(wb_byteenable_o, byteenable_next);
         
         SAVE(counter, counter - 2'd1);
     ENDIF();
@@ -263,26 +263,26 @@ ENDIF();
 
 IF(state == STATE_READ);
         
-    IF(avm_readdatavalid);
-        IF(avm_burstcount - { 1'b0, counter } == 3'd1); SAVE(bus_0, avm_readdata); ENDIF();
-        IF(avm_burstcount - { 1'b0, counter } == 3'd2); SAVE(bus_1, avm_readdata); ENDIF();
-        IF(avm_burstcount - { 1'b0, counter } == 3'd3); SAVE(bus_2, avm_readdata); ENDIF();
-        IF(avm_burstcount - { 1'b0, counter } == 3'd4); SAVE(bus_3, avm_readdata); ENDIF();
+    IF(wb_readdatavalid_i);
+        IF(wb_burstcount_o - { 1'b0, counter } == 3'd1); SAVE(bus_0, wb_readdata_i); ENDIF();
+        IF(wb_burstcount_o - { 1'b0, counter } == 3'd2); SAVE(bus_1, wb_readdata_i); ENDIF();
+        IF(wb_burstcount_o - { 1'b0, counter } == 3'd3); SAVE(bus_2, wb_readdata_i); ENDIF();
+        IF(wb_burstcount_o - { 1'b0, counter } == 3'd4); SAVE(bus_3, wb_readdata_i); ENDIF();
         
         SAVE(counter, counter - 2'd1);
                 
         IF(counter == 2'd0);
-            IF(avm_burstcount == 3'd4); SAVE(read_line_done_trigger, `TRUE);
+            IF(wb_burstcount_o == 3'd4); SAVE(read_line_done_trigger, `TRUE);
             ELSE();                     SAVE(read_burst_done_trigger,`TRUE);
             ENDIF();
             
-            SAVE(avm_read, `FALSE);
+            SAVE(wb_read_o, `FALSE);
             SAVE(state, STATE_IDLE);
         ENDIF();
     ENDIF();
     
-    IF(avm_waitrequest == `FALSE);
-        SAVE(avm_read, `FALSE);
+    IF(wb_waitrequest_i == `FALSE);
+        SAVE(wb_read_o, `FALSE);
     ENDIF();
 ENDIF();
 */
@@ -291,13 +291,13 @@ ENDIF();
     
 IF(state == STATE_READ_CODE);
 
-    IF(avm_readdatavalid);
-        SAVE(bus_code_partial, avm_readdata);
+    IF(wb_readdatavalid_i);
+        SAVE(bus_code_partial, wb_readdata_i);
         
-        IF(counter == 2'd3); SAVE(bus_0, avm_readdata); ENDIF();
-        IF(counter == 2'd2); SAVE(bus_1, avm_readdata); ENDIF();
-        IF(counter == 2'd1); SAVE(bus_2, avm_readdata); ENDIF();
-        IF(counter == 2'd0); SAVE(bus_3, avm_readdata); ENDIF();
+        IF(counter == 2'd3); SAVE(bus_0, wb_readdata_i); ENDIF();
+        IF(counter == 2'd2); SAVE(bus_1, wb_readdata_i); ENDIF();
+        IF(counter == 2'd1); SAVE(bus_2, wb_readdata_i); ENDIF();
+        IF(counter == 2'd0); SAVE(bus_3, wb_readdata_i); ENDIF();
         
         SAVE(counter, counter - 2'd1);
         
@@ -306,19 +306,19 @@ IF(state == STATE_READ_CODE);
         IF(counter == 2'd0);
             SAVE(read_code_done_trigger, `TRUE);
             
-            SAVE(avm_read, `FALSE);
+            SAVE(wb_read_o, `FALSE);
             SAVE(state, STATE_IDLE);
         ENDIF();
     ENDIF();
     
-    IF(avm_waitrequest == `FALSE);
-        SAVE(avm_read, `FALSE);
+    IF(wb_waitrequest_i == `FALSE);
+        SAVE(wb_read_o, `FALSE);
     ENDIF();
 ENDIF();
 */
 
 //------------------------------------------------------------------------------
 
-`include "autogen/avalon_mem.v"
+`include "autogen/wb_mem.v"
 
 endmodule

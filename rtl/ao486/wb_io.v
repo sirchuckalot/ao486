@@ -28,7 +28,7 @@
 
 //PARSED_COMMENTS: this file contains parsed script comments
 
-module avalon_io(
+module wb_io(
     input               clk,
     input               rst_n,
     
@@ -48,18 +48,18 @@ module avalon_io(
     
     input               dcache_busy,
     
-    //Avalon
-    output reg  [15:0]  avalon_io_address,
-    output reg  [3:0]   avalon_io_byteenable,
+    //Wishbone
+    output reg  [15:0]  wb_io_address_o,
+    output reg  [3:0]   wb_io_byteenable_o,
     
-    output              avalon_io_read,
-    input               avalon_io_readdatavalid,
-    input       [31:0]  avalon_io_readdata,
+    output              wb_io_read_o,
+    input               wb_io_readdatavalid_i,
+    input       [31:0]  wb_io_readdata_i,
     
-    output              avalon_io_write,
-    output reg  [31:0]  avalon_io_writedata,
+    output              wb_io_write_o,
+    output reg  [31:0]  wb_io_writedata_o,
     
-    input               avalon_io_waitrequest
+    input               wb_io_waitrequest_i
 );
 
 
@@ -69,40 +69,40 @@ reg [2:0] state;
 
 reg       was_readdatavalid;
 
-reg       avalon_io_read_reg;
-reg       avalon_io_write_reg;
+reg       wb_io_read_o_reg;
+reg       wb_io_write_o_reg;
 
-assign avalon_io_read  = (address_out_of_bounds)? 1'b0 : avalon_io_read_reg;
-assign avalon_io_write = (address_out_of_bounds)? 1'b0 : avalon_io_write_reg;
+assign wb_io_read_o  = (address_out_of_bounds)? 1'b0 : wb_io_read_o_reg;
+assign wb_io_write_o = (address_out_of_bounds)? 1'b0 : wb_io_write_o_reg;
 
 //------------------------------------------------------------------------------
 
 wire address_out_of_bounds =
-    (avalon_io_address >= 16'h0010 && avalon_io_address < 16'h0020) ||
-    (avalon_io_address == 16'h0020 && avalon_io_byteenable[1:0] == 2'b00) ||
-    (avalon_io_address >= 16'h0024 && avalon_io_address < 16'h0040) ||
-    (avalon_io_address >= 16'h0044 && avalon_io_address < 16'h0060) ||
-    (avalon_io_address >= 16'h0068 && avalon_io_address < 16'h0070) ||
-    (avalon_io_address == 16'h0070 && avalon_io_byteenable[1:0] == 2'b00) ||
-    (avalon_io_address >= 16'h0074 && avalon_io_address < 16'h0080) ||
-    (avalon_io_address == 16'h00A0 && avalon_io_byteenable[1:0] == 2'b00) ||
-    (avalon_io_address >= 16'h00A4 && avalon_io_address < 16'h00C0) ||
-    (avalon_io_address >= 16'h00E0 && avalon_io_address < 16'h01F0) ||
-    (avalon_io_address >= 16'h01F8 && avalon_io_address < 16'h0220) ||
-    (avalon_io_address >= 16'h0230 && avalon_io_address < 16'h0388) ||
-    (avalon_io_address == 16'h0388 && avalon_io_byteenable[1:0] == 2'b00) ||
-    (avalon_io_address >= 16'h038C && avalon_io_address < 16'h03B0) ||
-    (avalon_io_address >= 16'h03E0 && avalon_io_address < 16'h03F0) ||
-    (avalon_io_address >= 16'h03F8 && avalon_io_address < 16'h8888) ||
-    (avalon_io_address >= 16'h8890);
+    (wb_io_address_o >= 16'h0010 && wb_io_address_o < 16'h0020) ||
+    (wb_io_address_o == 16'h0020 && wb_io_byteenable_o[1:0] == 2'b00) ||
+    (wb_io_address_o >= 16'h0024 && wb_io_address_o < 16'h0040) ||
+    (wb_io_address_o >= 16'h0044 && wb_io_address_o < 16'h0060) ||
+    (wb_io_address_o >= 16'h0068 && wb_io_address_o < 16'h0070) ||
+    (wb_io_address_o == 16'h0070 && wb_io_byteenable_o[1:0] == 2'b00) ||
+    (wb_io_address_o >= 16'h0074 && wb_io_address_o < 16'h0080) ||
+    (wb_io_address_o == 16'h00A0 && wb_io_byteenable_o[1:0] == 2'b00) ||
+    (wb_io_address_o >= 16'h00A4 && wb_io_address_o < 16'h00C0) ||
+    (wb_io_address_o >= 16'h00E0 && wb_io_address_o < 16'h01F0) ||
+    (wb_io_address_o >= 16'h01F8 && wb_io_address_o < 16'h0220) ||
+    (wb_io_address_o >= 16'h0230 && wb_io_address_o < 16'h0388) ||
+    (wb_io_address_o == 16'h0388 && wb_io_byteenable_o[1:0] == 2'b00) ||
+    (wb_io_address_o >= 16'h038C && wb_io_address_o < 16'h03B0) ||
+    (wb_io_address_o >= 16'h03E0 && wb_io_address_o < 16'h03F0) ||
+    (wb_io_address_o >= 16'h03F8 && wb_io_address_o < 16'h8888) ||
+    (wb_io_address_o >= 16'h8890);
     
-wire [31:0] avalon_io_readdata_final =
+wire [31:0] wb_io_readdata_i_final =
     (address_out_of_bounds)?            32'hFFFFFFFF :
-    (avalon_io_address == 16'h0020)?    { 16'hFFFF, avalon_io_readdata[15:0] } :
-    (avalon_io_address == 16'h0070)?    { 16'hFFFF, avalon_io_readdata[15:0] } :
-    (avalon_io_address == 16'h00A0)?    { 16'hFFFF, avalon_io_readdata[15:0] } :
-    (avalon_io_address == 16'h0388)?    { 16'hFFFF, avalon_io_readdata[15:0] } :
-                                        avalon_io_readdata;
+    (wb_io_address_o == 16'h0020)?    { 16'hFFFF, wb_io_readdata_i[15:0] } :
+    (wb_io_address_o == 16'h0070)?    { 16'hFFFF, wb_io_readdata_i[15:0] } :
+    (wb_io_address_o == 16'h00A0)?    { 16'hFFFF, wb_io_readdata_i[15:0] } :
+    (wb_io_address_o == 16'h0388)?    { 16'hFFFF, wb_io_readdata_i[15:0] } :
+                                        wb_io_readdata_i;
 
 //------------------------------------------------------------------------------
 
@@ -195,16 +195,16 @@ assign read_two_stage =
     (io_read_length == 3'd4 && io_read_address[1:0] >= 2'd1);
     
 assign read_data_1 =
-    (io_read_address[1:0] == 2'd0)?    avalon_io_readdata_final :
-    (io_read_address[1:0] == 2'd1)?    { 8'd0,  avalon_io_readdata_final[31:8] } :
-    (io_read_address[1:0] == 2'd2)?    { 16'd0, avalon_io_readdata_final[31:16] } :
-                                       { 24'd0, avalon_io_readdata_final[31:24] };
+    (io_read_address[1:0] == 2'd0)?    wb_io_readdata_i_final :
+    (io_read_address[1:0] == 2'd1)?    { 8'd0,  wb_io_readdata_i_final[31:8] } :
+    (io_read_address[1:0] == 2'd2)?    { 16'd0, wb_io_readdata_i_final[31:16] } :
+                                       { 24'd0, wb_io_readdata_i_final[31:24] };
 
 assign read_data_2 =
-    (io_read_length == 3'd2 && io_read_address[1:0] == 2'd3)?   { avalon_io_readdata_final[23:0], io_read_data[7:0] } :
-    (io_read_length == 3'd4 && io_read_address[1:0] == 2'd1)?   { avalon_io_readdata_final[7:0],  io_read_data[23:0] } :
-    (io_read_length == 3'd4 && io_read_address[1:0] == 2'd2)?   { avalon_io_readdata_final[15:0], io_read_data[15:0] } :
-                                                                { avalon_io_readdata_final[23:0], io_read_data[7:0] };
+    (io_read_length == 3'd2 && io_read_address[1:0] == 2'd3)?   { wb_io_readdata_i_final[23:0], io_read_data[7:0] } :
+    (io_read_length == 3'd4 && io_read_address[1:0] == 2'd1)?   { wb_io_readdata_i_final[7:0],  io_read_data[23:0] } :
+    (io_read_length == 3'd4 && io_read_address[1:0] == 2'd2)?   { wb_io_readdata_i_final[15:0], io_read_data[15:0] } :
+                                                                { wb_io_readdata_i_final[23:0], io_read_data[7:0] };
     
     
 //------------------------------------------------------------------------------
@@ -224,17 +224,17 @@ IF(state == STATE_IDLE);
     
     IF(io_write_do && io_write_done == `FALSE && dcache_busy == `FALSE);
         
-        SAVE(avalon_io_address,    { io_write_address[15:2], 2'b0 });
-        SAVE(avalon_io_byteenable, write_1_byteenable);
-        SAVE(avalon_io_write_reg,  `TRUE);
-        SAVE(avalon_io_writedata,  write_1_data);
+        SAVE(wb_io_address_o,    { io_write_address[15:2], 2'b0 });
+        SAVE(wb_io_byteenable_o, write_1_byteenable);
+        SAVE(wb_io_write_o_reg,  `TRUE);
+        SAVE(wb_io_writedata_o,  write_1_data);
         
         SAVE(state, STATE_WRITE_1);
     ELSE_IF(io_read_do && io_read_done == `FALSE && dcache_busy == `FALSE);
     
-        SAVE(avalon_io_address,     { io_read_address[15:2], 2'b0 });
-        SAVE(avalon_io_byteenable,  read_1_byteenable);
-        SAVE(avalon_io_read_reg,    `TRUE);
+        SAVE(wb_io_address_o,     { io_read_address[15:2], 2'b0 });
+        SAVE(wb_io_byteenable_o,  read_1_byteenable);
+        SAVE(wb_io_read_o_reg,    `TRUE);
         
         SAVE(was_readdatavalid, `FALSE);
         SAVE(state, STATE_READ_1);
@@ -247,18 +247,18 @@ ENDIF();
 
 IF(state == STATE_WRITE_1);
     
-    IF(avalon_io_waitrequest == `FALSE || address_out_of_bounds);
+    IF(wb_io_waitrequest_i == `FALSE || address_out_of_bounds);
     
         IF(write_two_stage);
         
-            SAVE(avalon_io_address,     { write_address_next[15:2], 2'b0 });
-            SAVE(avalon_io_byteenable,  write_2_byteenable);
-            SAVE(avalon_io_write_reg,   `TRUE);
-            SAVE(avalon_io_writedata,   write_2_data);
+            SAVE(wb_io_address_o,     { write_address_next[15:2], 2'b0 });
+            SAVE(wb_io_byteenable_o,  write_2_byteenable);
+            SAVE(wb_io_write_o_reg,   `TRUE);
+            SAVE(wb_io_writedata_o,   write_2_data);
             
             SAVE(state, STATE_WRITE_2);
         ELSE();
-            SAVE(avalon_io_write_reg, `FALSE);
+            SAVE(wb_io_write_o_reg, `FALSE);
             
             SAVE(io_write_done, `TRUE);
             SAVE(state, STATE_IDLE);
@@ -271,8 +271,8 @@ ENDIF();
 
 IF(state == STATE_WRITE_2);
     
-    IF(avalon_io_waitrequest == `FALSE || address_out_of_bounds);
-        SAVE(avalon_io_write_reg, `FALSE);
+    IF(wb_io_waitrequest_i == `FALSE || address_out_of_bounds);
+        SAVE(wb_io_write_o_reg, `FALSE);
             
         SAVE(io_write_done, `TRUE);
         SAVE(state, STATE_IDLE);
@@ -284,26 +284,26 @@ ENDIF();
 
 IF(state == STATE_READ_1);
     
-    IF(avalon_io_readdatavalid || address_out_of_bounds);
+    IF(wb_io_readdatavalid_i || address_out_of_bounds);
         SAVE(io_read_data, read_data_1);
         
         IF(read_two_stage);
                 
-            SAVE(avalon_io_address,     { read_address_next[15:2], 2'b0 });
-            SAVE(avalon_io_byteenable,  read_2_byteenable);
+            SAVE(wb_io_address_o,     { read_address_next[15:2], 2'b0 });
+            SAVE(wb_io_byteenable_o,  read_2_byteenable);
             
-            SAVE(avalon_io_read_reg, `TRUE);
+            SAVE(wb_io_read_o_reg, `TRUE);
             SAVE(state, STATE_READ_2);
         ELSE();
             SAVE(io_read_done, `TRUE);
 
-            SAVE(avalon_io_read_reg, `FALSE);
+            SAVE(wb_io_read_o_reg, `FALSE);
             SAVE(state, STATE_IDLE);
         ENDIF();
     ENDIF();
     
-    IF(avalon_io_waitrequest == `FALSE);
-        SAVE(avalon_io_read_reg, `FALSE);
+    IF(wb_io_waitrequest_i == `FALSE);
+        SAVE(wb_io_read_o_reg, `FALSE);
     ENDIF();
     
 ENDIF();
@@ -313,16 +313,16 @@ ENDIF();
 
 IF(state == STATE_READ_2);
     
-    IF(avalon_io_readdatavalid || address_out_of_bounds);
+    IF(wb_io_readdatavalid_i || address_out_of_bounds);
         SAVE(io_read_done, `TRUE);
         SAVE(io_read_data, read_data_2);
             
-        SAVE(avalon_io_read_reg, `FALSE);
+        SAVE(wb_io_read_o_reg, `FALSE);
         SAVE(state, STATE_IDLE);
     ENDIF();
     
-    IF(avalon_io_waitrequest == `FALSE);
-        SAVE(avalon_io_read_reg, `FALSE);
+    IF(wb_io_waitrequest_i == `FALSE);
+        SAVE(wb_io_read_o_reg, `FALSE);
     ENDIF();
     
 ENDIF();
@@ -330,7 +330,7 @@ ENDIF();
 
 //------------------------------------------------------------------------------
 
-`include "autogen/avalon_io.v"
+`include "autogen/wb_io.v"
 
 //------------------------------------------------------------------------------
 

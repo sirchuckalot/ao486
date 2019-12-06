@@ -35,30 +35,31 @@ module ao486 (
     input   [7:0]       interrupt_vector,
     output              interrupt_done,
     
-    //-------------------------------------------------------------------------- Altera Avalon memory bus
-    output      [31:0]  avm_address,
-    output      [31:0]  avm_writedata,
-    output      [3:0]   avm_byteenable,
-    output      [2:0]   avm_burstcount,
-    output              avm_write,
-    output              avm_read,
+    //-------------------------------------------------------------------------- Wishbone memory bus
+    output      [31:0]  wb_address_o,
+    output      [31:0]  wb_writedata_o,
+    output      [3:0]   wb_byteenable_o,
+    //output      [2:0]   wb_burstcount_o,
+    output      [2:0]   wb_burstcount_o,
+    output              wb_write_o,
+    output              wb_read_o,
     
-    input               avm_waitrequest,
-    input               avm_readdatavalid,
-    input       [31:0]  avm_readdata,
+    input               wb_waitrequest_i,
+    input               wb_readdatavalid_i,
+    input       [31:0]  wb_readdata_i,
     
-    //-------------------------------------------------------------------------- Altera Avalon io bus
-    output  [15:0]      avalon_io_address,
-    output  [3:0]       avalon_io_byteenable,
+    //-------------------------------------------------------------------------- Wishbone io bus
+    output  [15:0]      wb_io_address_o,
+    output  [3:0]       wb_io_byteenable_o,
     
-    output              avalon_io_read,
-    input               avalon_io_readdatavalid,
-    input   [31:0]      avalon_io_readdata,
+    output              wb_io_read_o,
+    input               wb_io_readdatavalid_i,
+    input   [31:0]      wb_io_readdata_i,
     
-    output              avalon_io_write,
-    output  [31:0]      avalon_io_writedata,
+    output              wb_io_write_o,
+    output  [31:0]      wb_io_writedata_o,
     
-    input               avalon_io_waitrequest
+    input               wb_io_waitrequest_i
 );
 
 //------------------------------------------------------------------------------
@@ -280,7 +281,7 @@ wire        io_write_done;
 
 wire        dcache_busy;
 
-avalon_io avalon_io_inst(
+wb_io wb_io_inst(
     .clk                (clk),
     .rst_n              (rst_n),
     
@@ -300,17 +301,17 @@ avalon_io avalon_io_inst(
     
     .dcache_busy                   (dcache_busy),                   //input
     
-    //Avalon
-    .avalon_io_address             (avalon_io_address),             //output [15:0]
-    .avalon_io_byteenable          (avalon_io_byteenable),          //output [3:0]
+    //Wishbone
+    .wb_io_address_o             (wb_io_address_o),             //output [15:0]
+    .wb_io_byteenable_o          (wb_io_byteenable_o),          //output [3:0]
     
-    .avalon_io_read                (avalon_io_read),                //output
-    .avalon_io_readdatavalid       (avalon_io_readdatavalid),       //input
-    .avalon_io_readdata            (avalon_io_readdata),            //input [31:0]
+    .wb_io_read_o                (wb_io_read_o),                //output
+    .wb_io_readdatavalid_i       (wb_io_readdatavalid_i),       //input
+    .wb_io_readdata_i            (wb_io_readdata_i),            //input [31:0]
     
-    .avalon_io_write               (avalon_io_write),               //output
-    .avalon_io_writedata           (avalon_io_writedata),           //output [31:0]
-    .avalon_io_waitrequest         (avalon_io_waitrequest)          //input
+    .wb_io_write_o               (wb_io_write_o),               //output
+    .wb_io_writedata_o           (wb_io_writedata_o),           //output [31:0]
+    .wb_io_waitrequest_i         (wb_io_waitrequest_i)          //input
 );
 
 //------------------------------------------------------------------------------
@@ -447,7 +448,7 @@ wire        exe_reset;
 wire        wr_reset;
 
 
-memory memory_inst(
+memory_wb memory_inst(
     .clk                (clk),
     .rst_n              (rst_n),
     
@@ -547,16 +548,16 @@ memory memory_inst(
     .exe_reset                     (exe_reset),                     //input
     .wr_reset                      (wr_reset),                      //input
     
-    // avalon master
-    .avm_address                   (avm_address),                   //output [31:0]
-    .avm_writedata                 (avm_writedata),                 //output [31:0]
-    .avm_byteenable                (avm_byteenable),                //output [3:0]
-    .avm_burstcount                (avm_burstcount),                //output [2:0]
-    .avm_write                     (avm_write),                     //output
-    .avm_read                      (avm_read),                      //output
-    .avm_waitrequest               (avm_waitrequest),               //input
-    .avm_readdatavalid             (avm_readdatavalid),             //input
-    .avm_readdata                  (avm_readdata)                   //input [31:0]
+    // Wishbone master
+    .wb_address_o                   (wb_address_o),                   //output [31:0]
+    .wb_writedata_o                 (wb_writedata_o),                 //output [31:0]
+    .wb_byteenable_o                (wb_byteenable_o),                //output [3:0]
+    .wb_burstcount_o                (wb_burstcount_o),                //output [2:0]
+    .wb_write_o                     (wb_write_o),                     //output
+    .wb_read_o                      (wb_read_o),                      //output
+    .wb_waitrequest_i               (wb_waitrequest_i),               //input
+    .wb_readdatavalid_i             (wb_readdatavalid_i),             //input
+    .wb_readdata_i                  (wb_readdata_i)                   //input [31:0]
 );
 
 //------------------------------------------------------------------------------

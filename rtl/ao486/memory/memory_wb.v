@@ -137,17 +137,17 @@ module memory(
     input               exe_reset,
     input               wr_reset,
     
-    // avalon master
-    output      [31:0]  avm_address,
-    output      [31:0]  avm_writedata,
-    output      [3:0]   avm_byteenable,
-    output      [2:0]   avm_burstcount,
-    output              avm_write,
-    output              avm_read,
+    // Wishbone master
+    output      [31:0]  wb_address_o,
+    output      [31:0]  wb_writedata_o,
+    output      [3:0]   wb_byteenable_o,
+    output      [2:0]   wb_burstcount_o,
+    output              wb_write_o,
+    output              wb_read_o,
     
-    input               avm_waitrequest,
-    input               avm_readdatavalid,
-    input       [31:0]  avm_readdata
+    input               wb_waitrequest_i,
+    input               wb_readdatavalid_i,
+    input       [31:0]  wb_readdata_i
 );
 
 
@@ -506,7 +506,7 @@ wire            tlbcode_cache_disable;
 
 //------------------------------------------------------------------------------
 
-avalon_mem avalon_mem_inst(
+wb_mem avalon_mem_inst(
     // global
     .clk                        (clk),
     .rst_n                      (rst_n),
@@ -558,17 +558,17 @@ avalon_mem avalon_mem_inst(
     .readcode_partial_done      (resp_readcode_partial_done),   //output
     //END
     
-    // avalon master
-    .avm_address                (avm_address),                  //output [31:0]
-    .avm_writedata              (avm_writedata),                //output [31:0]
-    .avm_byteenable             (avm_byteenable),               //output [3:0]
-    .avm_burstcount             (avm_burstcount),               //output [2:0]
-    .avm_write                  (avm_write),                    //output
-    .avm_read                   (avm_read),                     //output
+    // Wishbone master
+    .wb_address_o                (wb_address_o),                  //output [31:0]
+    .wb_writedata_o              (wb_writedata_o),                //output [31:0]
+    .wb_byteenable_o             (wb_byteenable_o),               //output [3:0]
+    .wb_burstcount_o             (wb_burstcount_o),               //output [2:0]
+    .wb_write_o                  (wb_write_o),                    //output
+    .wb_read_o                   (wb_read_o),                     //output
     
-    .avm_waitrequest            (avm_waitrequest),              //input
-    .avm_readdatavalid          (avm_readdatavalid),            //input
-    .avm_readdata               (avm_readdata)                  //input [31:0]
+    .wb_waitrequest_i            (wb_waitrequest_i),              //input
+    .wb_readdatavalid_i          (wb_readdatavalid_i),            //input
+    .wb_readdata_i               (wb_readdata_i)                  //input [31:0]
 );
 
 //------------------------------------------------------------------------------
