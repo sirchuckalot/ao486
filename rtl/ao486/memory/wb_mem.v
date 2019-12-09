@@ -95,7 +95,7 @@ module wb_mem(
     input               wb_ack_i,
     input               wb_readdatavalid_i,
     input               wb_err_i, // New signal
-    input               wb_rty_i // New signal
+    input               wb_rty_i  // New signal
 );
 
 //------------------------------------------------------------------------------
@@ -183,32 +183,31 @@ IF(state == STATE_IDLE);
     IF(writeburst_do);
     
         SAVE(wb_adr_o,        { writeburst_address[31:2], 2'd0 });
-        SAVE(wb_sel_o,     writeburst_byteenable_0);
-        SAVE(byteenable_next,    writeburst_byteenable_1);
-        SAVE(current_burstcount,     { 1'b0, writeburst_dword_length }); // Not used in Wishbone
-        SAVE(wb_we_o,          `TRUE);
-        SAVE(wb_cyc_o,         `TRUE); // New signal
-        SAVE(wb_stb_o,         `TRUE); // New signal
+        SAVE(wb_sel_o,        writeburst_byteenable_0);
+        SAVE(byteenable_next, writeburst_byteenable_1);
+        SAVE(wb_we_o,         `TRUE);
+        SAVE(wb_cyc_o,        `TRUE); // New signal
+        SAVE(wb_stb_o,        `TRUE); // New signal
         
         // Single classic cycle
         IF(writeburst_dword_length == 2'd1);
-            SAVE(wb_cti_o,        3'b000); // New signal - CTI_CLASSIC
-            SAVE(wb_bte_o,        2'd0  ); // New signal - BTE_LINEAR
-            SAVE(counter,    2'd0);
+            SAVE(wb_cti_o,    3'b000); // New signal - CTI_CLASSIC
+            SAVE(wb_bte_o,    2'd0  ); // New signal - BTE_LINEAR
+            SAVE(counter,     2'd0);
         ENDIF();
         
         // Everything else is burst cycles
         IF(writeburst_dword_length != 2'd1);
-            SAVE(wb_cti_o,        3'b010); // New signal - CTI_CLASSIC
-            SAVE(wb_bte_o,        2'd0  ); // New signal - BTE_LINEAR
-            SAVE(counter,    writeburst_dword_length - 2'd1);
+            SAVE(wb_cti_o,    3'b010); // New signal - CTI_INC_BURST
+            SAVE(wb_bte_o,    2'd0  ); // New signal - BTE_LINEAR
+            SAVE(counter,     writeburst_dword_length - 2'd1);
         ENDIF();
         
-        SAVE(wb_dat_o,         writeburst_data[31:0]);
-        SAVE(bus_0,         { 8'd0, writeburst_data[55:32] });
+        SAVE(wb_dat_o,        writeburst_data[31:0]);
+        SAVE(bus_0,           { 8'd0, writeburst_data[55:32] });
 
         SET(writeburst_done);
-        SAVE(state,      STATE_WRITE);
+        SAVE(state,           STATE_WRITE);
 
     ELSE_IF(writeline_do);
 
@@ -265,35 +264,35 @@ ENDIF();
 IF(state == STATE_WRITE);    
 
     // End classic cycle
-    IF((wb_ack_i) && (wb_cti_o == 3'b000));
+    IF((wb_ack_i) && counter == 2'd0);
         SAVE(wb_sel_o, 4'b0000);        
         SAVE(wb_we_o,  `FALSE);
         SAVE(wb_cyc_o, `FALSE); // New Signal
         SAVE(wb_stb_o, `FALSE); // New Signal
-        SAVE(wb_cti_o, 3'b000); // New Signal - CTI_END_OF_BURST
+        SAVE(wb_cti_o, 3'b000); // New Signal - CTI_CLASSIC
         SAVE(wb_bte_o, 2'd0  ); // New Signal
-        SAVE(state,      STATE_IDLE);
+        SAVE(state,    STATE_IDLE);
     ENDIF();
     
     // End burst cycle
-    IF((wb_ack_i) && counter == 2'd1);
+    IF((wb_ack_i) && counter != 2'd0);
         SAVE(wb_we_o,  `FALSE);
         SAVE(wb_cyc_o, `FALSE); // New Signal
         SAVE(wb_stb_o, `FALSE); // New Signal
         SAVE(wb_cti_o, 3'b111); // New Signal - CTI_END_OF_BURST
         SAVE(wb_bte_o, 2'd0  ); // New Signal
-        SAVE(state,      STATE_IDLE);
+        SAVE(state,    STATE_IDLE);
     ENDIF();
     
     // Everything else is burst cycle
     IF((wb_ack_i) && counter != 2'd0);
         SAVE(wb_dat_o, bus_0);
-        SAVE(bus_0,         bus_1);
-        SAVE(bus_1,         bus_2);
+        SAVE(bus_0,    bus_1);
+        SAVE(bus_1,    bus_2);
         
         SAVE(wb_sel_o, byteenable_next);
         
-        SAVE(counter, counter - 2'd1);
+        SAVE(counter,  counter - 2'd1);
     ENDIF();
 ENDIF();
 */
