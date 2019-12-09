@@ -1,0 +1,81 @@
+CAPI=2:
+
+name : ::ao486:0
+
+filesets:
+    files_tb_wb_depends:
+        depend:
+            - vlog_tb_utils
+            - wb_bfm
+    
+    files_rtl_defines:
+        files:
+            - rtl/ao486/defines.v: {is_include_file : true}
+            - rtl/ao486/autogen/defines.v: {is_include_file : true}
+            - rtl/ao486/startup_default.v: {is_include_file : true}
+        file_type: verilogSource
+           
+    files_rtl_tb_wb_mem:
+        files:
+            - rtl/ao486/autogen/wb_mem.v: {is_include_file : true}
+            - rtl/ao486/memory/wb_mem.v
+            - sim/iverilog/ao486/tb_wb_mem.v            
+        file_type: verilogSource
+
+    files_rtl_tb_avalon_mem:
+        files:
+            - rtl/ao486/autogen/avalon_mem.v: {is_include_file : true}
+            - rtl/ao486/memory/avalon_mem.v
+            - sim/iverilog/ao486/tb_avalon_mem.v            
+        file_type: verilogSource
+
+    files_rtl_tb_wb_io:
+        files:
+            - rtl/ao486/autogen/wb_io.v: {is_include_file : true}
+            - rtl/ao486/wb_io.v
+            - sim/iverilog/ao486/tb_wb_io.v            
+        file_type: verilogSource
+
+targets:
+    sim_test_wb_io:
+        default_tool: icarus
+        filesets:
+            - files_tb_wb_depends
+            - files_rtl_defines
+            - files_rtl_tb_wb_io
+        parameters : [timeout, vcd]
+        toplevel: tb_wb_io
+        
+    sim_test_wb_mem:
+        default_tool: icarus
+        filesets:
+            - files_tb_wb_depends
+            - files_rtl_defines
+            - files_rtl_tb_wb_mem
+        parameters : [timeout, vcd]
+        toplevel: tb_wb_mem
+
+    sim_test_avalon_mem:
+        default_tool: icarus
+        filesets:
+            - files_tb_wb_depends
+            - files_rtl_defines
+            - files_rtl_tb_avalon_mem
+        parameters : [timeout, vcd]
+        toplevel: tb_avalon_mem
+
+    default:
+        filesets:
+            - files_rtl_defines
+            - files_rtl_tb_wb_io
+            - files_rtl_tb_wb_mem
+
+parameters:
+    timeout:
+        datatype : int
+        paramtype : plusarg
+
+    vcd:
+        datatype : bool
+        description : Dump VCD
+        paramtype : plusarg

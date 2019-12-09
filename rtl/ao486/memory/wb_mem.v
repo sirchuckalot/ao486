@@ -81,16 +81,21 @@ module wb_mem(
     //END
     
     // Wishbone master
-    output reg  [31:0]  wb_address_o,
-    output reg  [31:0]  wb_writedata_o,
-    output reg  [3:0]   wb_byteenable_o,
-    output reg  [2:0]   wb_burstcount_o,
-    output reg          wb_write_o,
+    output reg  [31:0]  wb_adr_o,
+    output reg  [31:0]  wb_dat_o,
+    output reg  [3:0]   wb_sel_o,
+    output reg          wb_we_o,
+    output reg          wb_cyc_o, // New signal
+    output reg          wb_stb_o, // New signal
+    output reg [2:0]    wb_cti_o, // New signal
+    output reg [1:0]    wb_bte_o, // New signal
     output reg          wb_read_o,
     
-    input               wb_waitrequest_i,
+    input       [31:0]  wb_dat_i,
+    input               wb_ack_i,
     input               wb_readdatavalid_i,
-    input       [31:0]  wb_readdata_i
+    input               wb_err_i, // New signal
+    input               wb_rty_i // New signal
 );
 
 //------------------------------------------------------------------------------
@@ -103,6 +108,8 @@ reg [31:0]  bus_3;
 reg [3:0]   byteenable_next;
 reg [1:0]   counter;
 reg [1:0]   state;
+
+reg [2:0]   current_burstcount;
 
 reg         read_burst_done_trigger;
 reg         read_line_done_trigger;
@@ -174,29 +181,44 @@ IF(state == STATE_IDLE);
     ENDIF();
     
     IF(writeburst_do);
-
-        SAVE(wb_address_o,        { writeburst_address[31:2], 2'd0 });
-        SAVE(wb_byteenable_o,     writeburst_byteenable_0);
+    
+        SAVE(wb_adr_o,        { writeburst_address[31:2], 2'd0 });
+        SAVE(wb_sel_o,     writeburst_byteenable_0);
         SAVE(byteenable_next,    writeburst_byteenable_1);
-        SAVE(wb_burstcount_o,     { 1'b0, writeburst_dword_length });
-        SAVE(wb_write_o,          `TRUE);
-
-        SAVE(wb_writedata_o,         writeburst_data[31:0]);
+        SAVE(current_burstcount,     { 1'b0, writeburst_dword_length }); // Not used in Wishbone
+        SAVE(wb_we_o,          `TRUE);
+        SAVE(wb_cyc_o,         `TRUE); // New signal
+        SAVE(wb_stb_o,         `TRUE); // New signal
+        
+        // Single classic cycle
+        IF(writeburst_dword_length == 2'd1);
+            SAVE(wb_cti_o,        3'b000); // New signal - CTI_CLASSIC
+            SAVE(wb_bte_o,        2'd0  ); // New signal - BTE_LINEAR
+            SAVE(counter,    2'd0);
+        ENDIF();
+        
+        // Everything else is burst cycles
+        IF(writeburst_dword_length != 2'd1);
+            SAVE(wb_cti_o,        3'b010); // New signal - CTI_CLASSIC
+            SAVE(wb_bte_o,        2'd0  ); // New signal - BTE_LINEAR
+            SAVE(counter,    writeburst_dword_length - 2'd1);
+        ENDIF();
+        
+        SAVE(wb_dat_o,         writeburst_data[31:0]);
         SAVE(bus_0,         { 8'd0, writeburst_data[55:32] });
 
         SET(writeburst_done);
-        SAVE(counter,    writeburst_dword_length - 2'd1);
         SAVE(state,      STATE_WRITE);
 
     ELSE_IF(writeline_do);
 
-        SAVE(wb_address_o,        { writeline_address[31:4], 4'd0 });
-        SAVE(wb_byteenable_o,     4'hF);
+        SAVE(wb_adr_o,        { writeline_address[31:4], 4'd0 });
+        SAVE(wb_sel_o,     4'hF);
         SAVE(byteenable_next,    4'hF);
-        SAVE(wb_burstcount_o,     3'd4);
-        SAVE(wb_write_o,          `TRUE);
+        SAVE(current_burstcount,     3'd4);
+        SAVE(wb_we_o,          `TRUE);
 
-        SAVE(wb_writedata_o, writeline_line[31:0]);
+        SAVE(wb_dat_o, writeline_line[31:0]);
         SAVE(bus_0,         writeline_line[63:32]);
         SAVE(bus_1,         writeline_line[95:64]);
         SAVE(bus_2,         writeline_line[127:96]);
@@ -207,9 +229,9 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(readburst_do && ~(readburst_done));
 
-        SAVE(wb_address_o,    { readburst_address[31:2], 2'd0 });
-        SAVE(wb_byteenable_o, read_burst_byteenable);
-        SAVE(wb_burstcount_o, { 1'b0, readburst_dword_length });
+        SAVE(wb_adr_o,    { readburst_address[31:2], 2'd0 });
+        SAVE(wb_sel_o, read_burst_byteenable);
+        SAVE(current_burstcount, { 1'b0, readburst_dword_length });
         SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    readburst_dword_length - 2'd1);
@@ -217,9 +239,9 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(readline_do && ~(readline_done));
 
-        SAVE(wb_address_o,    { readline_address[31:4], 4'd0 });
-        SAVE(wb_byteenable_o, 4'hF);
-        SAVE(wb_burstcount_o, 3'd4);
+        SAVE(wb_adr_o,    { readline_address[31:4], 4'd0 });
+        SAVE(wb_sel_o, 4'hF);
+        SAVE(current_burstcount, 3'd4);
         SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    2'd3);
@@ -227,9 +249,9 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(readcode_do && ~(readcode_done));
 
-        SAVE(wb_address_o,    { readcode_address[31:2], 2'd0 });
-        SAVE(wb_byteenable_o, 4'hF);
-        SAVE(wb_burstcount_o, 3'd4);
+        SAVE(wb_adr_o,    { readcode_address[31:2], 2'd0 });
+        SAVE(wb_sel_o, 4'hF);
+        SAVE(current_burstcount, 3'd4);
         SAVE(wb_read_o,      `TRUE);
 
         SAVE(counter,    2'd3);
@@ -239,20 +261,37 @@ ENDIF();
 */
 
 /*******************************************************************************SCRIPT
-    
+
 IF(state == STATE_WRITE);    
 
-    IF(~(wb_waitrequest_i) && counter == 2'd0);
-        SAVE(wb_write_o,  `FALSE);
+    // End classic cycle
+    IF((wb_ack_i) && (wb_cti_o == 3'b000));
+        SAVE(wb_sel_o, 4'b0000);        
+        SAVE(wb_we_o,  `FALSE);
+        SAVE(wb_cyc_o, `FALSE); // New Signal
+        SAVE(wb_stb_o, `FALSE); // New Signal
+        SAVE(wb_cti_o, 3'b000); // New Signal - CTI_END_OF_BURST
+        SAVE(wb_bte_o, 2'd0  ); // New Signal
         SAVE(state,      STATE_IDLE);
     ENDIF();
     
-    IF(~(wb_waitrequest_i) && counter != 2'd0);
-        SAVE(wb_writedata_o, bus_0);
+    // End burst cycle
+    IF((wb_ack_i) && counter == 2'd1);
+        SAVE(wb_we_o,  `FALSE);
+        SAVE(wb_cyc_o, `FALSE); // New Signal
+        SAVE(wb_stb_o, `FALSE); // New Signal
+        SAVE(wb_cti_o, 3'b111); // New Signal - CTI_END_OF_BURST
+        SAVE(wb_bte_o, 2'd0  ); // New Signal
+        SAVE(state,      STATE_IDLE);
+    ENDIF();
+    
+    // Everything else is burst cycle
+    IF((wb_ack_i) && counter != 2'd0);
+        SAVE(wb_dat_o, bus_0);
         SAVE(bus_0,         bus_1);
         SAVE(bus_1,         bus_2);
         
-        SAVE(wb_byteenable_o, byteenable_next);
+        SAVE(wb_sel_o, byteenable_next);
         
         SAVE(counter, counter - 2'd1);
     ENDIF();
@@ -264,15 +303,15 @@ ENDIF();
 IF(state == STATE_READ);
         
     IF(wb_readdatavalid_i);
-        IF(wb_burstcount_o - { 1'b0, counter } == 3'd1); SAVE(bus_0, wb_readdata_i); ENDIF();
-        IF(wb_burstcount_o - { 1'b0, counter } == 3'd2); SAVE(bus_1, wb_readdata_i); ENDIF();
-        IF(wb_burstcount_o - { 1'b0, counter } == 3'd3); SAVE(bus_2, wb_readdata_i); ENDIF();
-        IF(wb_burstcount_o - { 1'b0, counter } == 3'd4); SAVE(bus_3, wb_readdata_i); ENDIF();
+        IF(current_burstcount - { 1'b0, counter } == 3'd1); SAVE(bus_0, wb_dat_i); ENDIF();
+        IF(current_burstcount - { 1'b0, counter } == 3'd2); SAVE(bus_1, wb_dat_i); ENDIF();
+        IF(current_burstcount - { 1'b0, counter } == 3'd3); SAVE(bus_2, wb_dat_i); ENDIF();
+        IF(current_burstcount - { 1'b0, counter } == 3'd4); SAVE(bus_3, wb_dat_i); ENDIF();
         
         SAVE(counter, counter - 2'd1);
                 
         IF(counter == 2'd0);
-            IF(wb_burstcount_o == 3'd4); SAVE(read_line_done_trigger, `TRUE);
+            IF(current_burstcount == 3'd4); SAVE(read_line_done_trigger, `TRUE);
             ELSE();                     SAVE(read_burst_done_trigger,`TRUE);
             ENDIF();
             
@@ -281,7 +320,7 @@ IF(state == STATE_READ);
         ENDIF();
     ENDIF();
     
-    IF(wb_waitrequest_i == `FALSE);
+    IF(wb_ack_i == `FALSE);
         SAVE(wb_read_o, `FALSE);
     ENDIF();
 ENDIF();
@@ -292,12 +331,12 @@ ENDIF();
 IF(state == STATE_READ_CODE);
 
     IF(wb_readdatavalid_i);
-        SAVE(bus_code_partial, wb_readdata_i);
+        SAVE(bus_code_partial, wb_dat_i);
         
-        IF(counter == 2'd3); SAVE(bus_0, wb_readdata_i); ENDIF();
-        IF(counter == 2'd2); SAVE(bus_1, wb_readdata_i); ENDIF();
-        IF(counter == 2'd1); SAVE(bus_2, wb_readdata_i); ENDIF();
-        IF(counter == 2'd0); SAVE(bus_3, wb_readdata_i); ENDIF();
+        IF(counter == 2'd3); SAVE(bus_0, wb_dat_i); ENDIF();
+        IF(counter == 2'd2); SAVE(bus_1, wb_dat_i); ENDIF();
+        IF(counter == 2'd1); SAVE(bus_2, wb_dat_i); ENDIF();
+        IF(counter == 2'd0); SAVE(bus_3, wb_dat_i); ENDIF();
         
         SAVE(counter, counter - 2'd1);
         
@@ -311,7 +350,7 @@ IF(state == STATE_READ_CODE);
         ENDIF();
     ENDIF();
     
-    IF(wb_waitrequest_i == `FALSE);
+    IF(wb_ack_i == `FALSE);
         SAVE(wb_read_o, `FALSE);
     ENDIF();
 ENDIF();
