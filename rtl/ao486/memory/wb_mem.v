@@ -211,20 +211,25 @@ IF(state == STATE_IDLE);
 
     ELSE_IF(writeline_do);
 
-        SAVE(wb_adr_o,        { writeline_address[31:4], 4'd0 });
-        SAVE(wb_sel_o,     4'hF);
+        SAVE(wb_adr_o,           { writeline_address[31:4], 4'd0 });
+        SAVE(wb_sel_o,           4'hF);
         SAVE(byteenable_next,    4'hF);
-        SAVE(current_burstcount,     3'd4);
-        SAVE(wb_we_o,          `TRUE);
+        SAVE(current_burstcount, 3'd4);
+        SAVE(wb_we_o,            `TRUE);
+        
+        SAVE(wb_cyc_o,           `TRUE);  // New signal
+        SAVE(wb_stb_o,           `TRUE);  // New signal        
+        SAVE(wb_cti_o,           3'b010); // New signal - CTI_INC_BURST
+        SAVE(wb_bte_o,           2'd0  ); // New signal - BTE_LINEAR
 
-        SAVE(wb_dat_o, writeline_line[31:0]);
-        SAVE(bus_0,         writeline_line[63:32]);
-        SAVE(bus_1,         writeline_line[95:64]);
-        SAVE(bus_2,         writeline_line[127:96]);
+        SAVE(wb_dat_o,           writeline_line[31:0]);
+        SAVE(bus_0,              writeline_line[63:32]);
+        SAVE(bus_1,              writeline_line[95:64]);
+        SAVE(bus_2,              writeline_line[127:96]);
 
         SET(writeline_done);
-        SAVE(counter,    2'd3);
-        SAVE(state,      STATE_WRITE);
+        SAVE(counter,            2'd3);
+        SAVE(state,              STATE_WRITE);
 
     ELSE_IF(readburst_do && ~(readburst_done));
 

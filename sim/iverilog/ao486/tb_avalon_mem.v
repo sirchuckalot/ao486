@@ -49,11 +49,7 @@ module tb_avalon_mem;
     end
  
     
-    // Temp drivers for wishbone
-    //reg wb_ack_i;
-    //wire wb_we_o;
-    
-    // Burst Write Test Wires
+    // Write brust test wires
     reg writeburst_do;
     wire writeburst_done;
     
@@ -62,16 +58,22 @@ module tb_avalon_mem;
     reg [3:0]   writeburst_byteenable_0;
     reg [3:0]   writeburst_byteenable_1;
     reg [55:0]  writeburst_data;
+    
+    // Writeline test wires
+    reg writeline_do;              // input         writeline_do
+    wire writeline_done;           // output        writeline_done  
+    reg [31:0]  writeline_address; // input [31:0]  writeline_address
+    reg [127:0] writeline_line;    // input [127:0] writeline_line
 
 
     task task_waitclock_n;
-    input integer n;
+        input integer n;
 
-    begin
-    repeat(n) begin
-    @(posedge wb_clk);
-    end
-    end
+        begin
+            repeat(n) begin
+                @(posedge wb_clk);
+            end
+        end
     endtask // task_waitclock_n    
     
 
@@ -79,13 +81,18 @@ module tb_avalon_mem;
     begin
         // wb_rst is already being held high for 100 units
            
-        // init writeburst
+        // Init writeburst
         writeburst_do = 1'b0;
         writeburst_address = 32'b0;
         writeburst_dword_length = 2'b0;
         writeburst_byteenable_0 = 4'b0;
         writeburst_byteenable_1 = 4'b0;
         writeburst_data = 56'b0;
+        
+        // Init writeline
+        writeline_do = 1'b0;       // input         writeline_do,
+        writeline_address = 32'b0; // input [31:0]  writeline_address,
+        writeline_line = 128'b0;   // input [127:0] writeline_line,
            
         // Wait until reset has been released
         @(negedge wb_rst);        
@@ -111,7 +118,7 @@ module tb_avalon_mem;
             writeburst_do           <= #Tp 1'b1;
             i = 0;
             while (~writeburst_done) begin
-                i = 1 + 1;
+                i = i + 1;
                 task_waitclock_n(1);
             end
             //waitclock;
@@ -128,7 +135,30 @@ module tb_avalon_mem;
             writeburst_do   <= #Tp 1'b0;
         end
     endtask // writeburst
-   
+    
+    task task_writeline;
+    
+        input [31:0]  writeline_address_i; // input [31:0]  writeline_address,
+        input [127:0] writeline_line_i;    // input [127:0] writeline_line,
+        integer i;
+        
+        begin
+            writeline_address <= #Tp writeline_address_i;
+            writeline_line    <= #Tp writeline_line_i;
+            writeline_do      <= #Tp 1'b1;
+            i = 0;
+            while (~writeline_done) begin
+                i = i + 1;
+                task_waitclock_n(1);
+            end
+            //waitclock;
+            $display("Writeline: %x=%x acked in %d clocks", writeline_address_i,
+                                                            writeline_line_i, i);
+            writeline_do      <= #Tp 1'b0;
+            writeline_line    <= #Tp 128'b0;
+            writeline_address <= #Tp 32'b0;
+        end
+    endtask // writeline
 
     initial begin
         
@@ -140,7 +170,21 @@ module tb_avalon_mem;
         
         // Now try writeburst
         // task_writeburst(address, writeburst_length, byteendable_0, byteenable_1, data)
-        task_writeburst(32'h0101, 2'd2, 4'b1111, 4'b0101, 56'h23_4567_89ab_cdef);           
+        //task_writeburst(32'h0101, 2'd0, 4'b1111, 4'b0101, 56'h23_4567_89ab_cdef);
+        //task_waitclock_n(5);
+        //task_writeburst(32'h0101, 2'd1, 4'b1111, 4'b0101, 56'h23_4567_89ab_cdef);
+        //task_waitclock_n(5);
+        //task_writeburst(32'h0101, 2'd2, 4'b1111, 4'b0101, 56'h23_4567_89ab_cdef);
+        //task_waitclock_n(5);
+        //task_writeburst(32'h0101, 2'd3, 4'b1111, 4'b0101, 56'h23_4567_89ab_cdef);
+        //task_waitclock_n(5);
+        
+        // Wait another few clocks
+        //task_waitclock_n(5);
+        
+        //$display();
+        // Now try writeline
+        task_writeline(32'h0101, 128'h8888_7777_6666_5555__4444_3333_2222_1111);
         
         // Wait another few clocks
         task_waitclock_n(5);
@@ -165,11 +209,11 @@ module tb_avalon_mem;
      //END
     
      //RESP:
-     .writeline_do(1'b0),            // input               writeline_do,
-     .writeline_done(),          // output              writeline_done,
+     .writeline_do(writeline_do),           // input               writeline_do,
+     .writeline_done(writeline_done),       // output              writeline_done,
     
-     .writeline_address(32'b0),       // input       [31:0]  writeline_address,
-     .writeline_line(128'b0),          // input       [127:0] writeline_line,
+     .writeline_address(writeline_address), // input       [31:0]  writeline_address,
+     .writeline_line(writeline_line),       // input       [127:0] writeline_line,
      //END
     
      //RESP:

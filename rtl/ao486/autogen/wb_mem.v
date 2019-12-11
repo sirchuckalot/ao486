@@ -31,14 +31,14 @@ wire cond_28 = counter < 2'd3;
 //======================================================== saves
 wire  wb_we_o_to_reg =
     (cond_0 && cond_4)? (         `TRUE) :
-    (cond_0 && ~cond_4 && cond_7)? (          `TRUE) :
+    (cond_0 && ~cond_4 && cond_7)? (            `TRUE) :
     (cond_11 && cond_12)? (  `FALSE) :
     (cond_11 && cond_13)? (  `FALSE) :
     wb_we_o;
 wire [2:0] wb_cti_o_to_reg =
     (cond_0 && cond_4 && cond_5)? (    3'b000) :
     (cond_0 && cond_4 && cond_6)? (    3'b010) :
-    (cond_0 && ~cond_4 && cond_7)? (    3'b010) :
+    (cond_0 && ~cond_4 && cond_7)? (           3'b010) :
     (cond_11 && cond_12)? ( 3'b000) :
     (cond_11 && cond_13)? ( 3'b111) :
     wb_cti_o;
@@ -52,31 +52,31 @@ wire  wb_read_o_to_reg =
     (cond_24 && cond_23)? ( `FALSE) :
     wb_read_o;
 wire [2:0] current_burstcount_to_reg =
-    (cond_0 && ~cond_4 && cond_7)? (     3'd4) :
+    (cond_0 && ~cond_4 && cond_7)? ( 3'd4) :
     (cond_0 && ~cond_4 && ~cond_7 && cond_8)? ( { 1'b0, readburst_dword_length }) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && cond_9)? ( 3'd4) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && ~cond_9 && cond_10)? ( 3'd4) :
     current_burstcount;
 wire  wb_stb_o_to_reg =
     (cond_0 && cond_4)? (        `TRUE) :
-    (cond_0 && ~cond_4 && cond_7)? (        `TRUE) :
+    (cond_0 && ~cond_4 && cond_7)? (           `TRUE) :
     (cond_11 && cond_12)? ( `FALSE) :
     (cond_11 && cond_13)? ( `FALSE) :
     wb_stb_o;
 wire [31:0] bus_2_to_reg =
-    (cond_0 && ~cond_4 && cond_7)? (         writeline_line[127:96]) :
+    (cond_0 && ~cond_4 && cond_7)? (              writeline_line[127:96]) :
     (cond_15 && cond_16 && cond_19)? ( wb_dat_i) :
     (cond_24 && cond_16 && cond_27)? ( wb_dat_i) :
     bus_2;
 wire [1:0] wb_bte_o_to_reg =
     (cond_0 && cond_4 && cond_5)? (    2'd0  ) :
     (cond_0 && cond_4 && cond_6)? (    2'd0  ) :
-    (cond_0 && ~cond_4 && cond_7)? (    2'd0  ) :
+    (cond_0 && ~cond_4 && cond_7)? (           2'd0  ) :
     (cond_11 && cond_12)? ( 2'd0  ) :
     (cond_11 && cond_13)? ( 2'd0  ) :
     wb_bte_o;
 wire [31:0] bus_1_to_reg =
-    (cond_0 && ~cond_4 && cond_7)? (         writeline_line[95:64]) :
+    (cond_0 && ~cond_4 && cond_7)? (              writeline_line[95:64]) :
     (cond_11 && cond_14)? (    bus_2) :
     (cond_15 && cond_16 && cond_18)? ( wb_dat_i) :
     (cond_24 && cond_16 && cond_26)? ( wb_dat_i) :
@@ -87,12 +87,12 @@ wire  read_code_done_trigger_to_reg =
     read_code_done_trigger;
 wire [31:0] wb_dat_o_to_reg =
     (cond_0 && cond_4)? (        writeburst_data[31:0]) :
-    (cond_0 && ~cond_4 && cond_7)? ( writeline_line[31:0]) :
+    (cond_0 && ~cond_4 && cond_7)? (           writeline_line[31:0]) :
     (cond_11 && cond_14)? ( bus_0) :
     wb_dat_o;
 wire [31:0] bus_0_to_reg =
     (cond_0 && cond_4)? (           { 8'd0, writeburst_data[55:32] }) :
-    (cond_0 && ~cond_4 && cond_7)? (         writeline_line[63:32]) :
+    (cond_0 && ~cond_4 && cond_7)? (              writeline_line[63:32]) :
     (cond_11 && cond_14)? (    bus_1) :
     (cond_15 && cond_16 && cond_17)? ( wb_dat_i) :
     (cond_24 && cond_16 && cond_25)? ( wb_dat_i) :
@@ -100,7 +100,7 @@ wire [31:0] bus_0_to_reg =
 wire [1:0] counter_to_reg =
     (cond_0 && cond_4 && cond_5)? (     2'd0) :
     (cond_0 && cond_4 && cond_6)? (     writeburst_dword_length - 2'd1) :
-    (cond_0 && ~cond_4 && cond_7)? (    2'd0) :
+    (cond_0 && ~cond_4 && cond_7)? (            2'd3) :
     (cond_0 && ~cond_4 && ~cond_7 && cond_8)? (    readburst_dword_length - 2'd1) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && cond_9)? (    2'd3) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && ~cond_9 && cond_10)? (    2'd3) :
@@ -121,7 +121,7 @@ wire [31:0] bus_code_partial_to_reg =
     bus_code_partial;
 wire [3:0] wb_sel_o_to_reg =
     (cond_0 && cond_4)? (        writeburst_byteenable_0) :
-    (cond_0 && ~cond_4 && cond_7)? (     4'hF) :
+    (cond_0 && ~cond_4 && cond_7)? (           4'hF) :
     (cond_0 && ~cond_4 && ~cond_7 && cond_8)? ( read_burst_byteenable) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && cond_9)? ( 4'hF) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && ~cond_9 && cond_10)? ( 4'hF) :
@@ -130,14 +130,14 @@ wire [3:0] wb_sel_o_to_reg =
     wb_sel_o;
 wire [31:0] wb_adr_o_to_reg =
     (cond_0 && cond_4)? (        { writeburst_address[31:2], 2'd0 }) :
-    (cond_0 && ~cond_4 && cond_7)? (        { writeline_address[31:4], 4'd0 }) :
+    (cond_0 && ~cond_4 && cond_7)? (           { writeline_address[31:4], 4'd0 }) :
     (cond_0 && ~cond_4 && ~cond_7 && cond_8)? (    { readburst_address[31:2], 2'd0 }) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && cond_9)? (    { readline_address[31:4], 4'd0 }) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && ~cond_9 && cond_10)? (    { readcode_address[31:2], 2'd0 }) :
     wb_adr_o;
 wire [1:0] state_to_reg =
     (cond_0 && cond_4)? (           STATE_WRITE) :
-    (cond_0 && ~cond_4 && cond_7)? (      STATE_WRITE) :
+    (cond_0 && ~cond_4 && cond_7)? (              STATE_WRITE) :
     (cond_0 && ~cond_4 && ~cond_7 && cond_8)? (      STATE_READ) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && cond_9)? (      STATE_READ) :
     (cond_0 && ~cond_4 && ~cond_7 && ~cond_8 && ~cond_9 && cond_10)? (      STATE_READ_CODE) :
@@ -156,7 +156,7 @@ wire  read_burst_done_trigger_to_reg =
     read_burst_done_trigger;
 wire  wb_cyc_o_to_reg =
     (cond_0 && cond_4)? (        `TRUE) :
-    (cond_0 && ~cond_4 && cond_7)? (        `TRUE) :
+    (cond_0 && ~cond_4 && cond_7)? (           `TRUE) :
     (cond_11 && cond_12)? ( `FALSE) :
     (cond_11 && cond_13)? ( `FALSE) :
     wb_cyc_o;
