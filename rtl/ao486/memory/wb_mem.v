@@ -275,7 +275,7 @@ IF(state == STATE_WRITE);
     ENDIF();
     
     // End burst cycle
-    IF((wb_ack_i) && counter != 2'd0);
+    IF((wb_ack_i) && counter == 2'd1);
         SAVE(wb_we_o,  `FALSE);
         SAVE(wb_cyc_o, `FALSE); // New Signal
         SAVE(wb_stb_o, `FALSE); // New Signal
@@ -284,7 +284,7 @@ IF(state == STATE_WRITE);
         SAVE(state,    STATE_IDLE);
     ENDIF();
     
-    // Everything else is burst cycle
+    // Everything except count == 0 is burst cycle
     IF((wb_ack_i) && counter != 2'd0);
         SAVE(wb_dat_o, bus_0);
         SAVE(bus_0,    bus_1);
